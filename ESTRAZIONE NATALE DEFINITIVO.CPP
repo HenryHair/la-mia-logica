@@ -4,68 +4,69 @@
 #include <stdbool.h>
 #include <string.h>
 #include <time.h>
-#include <ctype.h>
 
 //*****************************************************************************************************
 //												STRUCT
 //*****************************************************************************************************
 
-struct details
+struct StrDetails
 {
-	char name[20];
-	int id;
-	char coupling[20];
-	int pairednumber;
+	int ID;
+	int PairedNumber;
+	char PlayerName[20];
+	char PartnerName[20];
 	
-	void reset ()	// METHOD FOR CLEAR COUPLING AND PAIREDNUMBER
+	void reset()	// METHOD FOR CLEAR PartnerName AND PAIREDNUMBER
 	{
-		strcpy (coupling, "");
-		pairednumber = -1;	
+		strcpy(PartnerName, "");
+		PairedNumber = -1;	
 	}
 	
-	details ()	// STRUCTURE BUILDER
+	StrDetails()	// CONSTRUCTOR
 	{
-		strcpy (name, "");
-		id = -1;
-		strcpy (coupling, "");
-		pairednumber = -1;	
-	}	
+		strcpy(PlayerName, "");
+		ID = -1;
+		strcpy(PartnerName, "");
+		PairedNumber = -1;	
+	}
+	
 };
 
 //*****************************************************************************************************
 //											GLOBAL VARIABLES
 //*****************************************************************************************************
 
-details player [100];
+#define MAX_NUMBER_OF_PLAYERS 100
 
-int n_players = 0;	
+StrDetails Person[MAX_NUMBER_OF_PLAYERS];
+int NumOfPlayers = 0;	
 
 //*****************************************************************************************************
-//												PROTOTIPI
+//										GLOBAL FUNC PROTOTYPES
 //*****************************************************************************************************
 	
-void reset(int numofplayers, details *a);	// RESET DATAS COLLECTED IN THE STRUCT
+void SetNumOfPlayers();	// GET NUMBER OF THE PLAYERS FROM EXT. INPUT
+void SetPlayerName(StrDetails *a);	// GET PLAYERS' NAMES FROM EXT. INPUT
+void Coupling();	// CREATE RANDOM COUPLES BETWEEN PLAYERS
+void PrintResults(); // PRINT CUPLING RESULTS
 
-int getplayersnumber();	// GET NUMBER OF THE PLAYERS FROM EXT. INPUT
+//*****************************************************************************************************
+//										LOCAL FUNC PROTOTYPES
+//*****************************************************************************************************
 
-void getplayersnames (details *a);	// GET PLAYERS' NAMES FROM EXT. INPUT
-
-char carattereMinuscolo (char a[]); // CONVERT NAMES IN LOWERCASE
-
-void coupling();	// CREATE RANDOM COUPLES BETWEEN PLAYERS
-
-void printresults(); // PRINT CUPLING RESULTS
+static void reset(int numofplayers, StrDetails *a);	// RESET DATAS COLLECTED IN THE STRUCT
+static void SetNameToLowerCase(char a[]); // CONVERT NAMES IN LOWERCASE
 
 //*****************************************************************************************************
 //												MAIN
 //*****************************************************************************************************
 
-int main ()
+int main()
 {
-	getplayersnumber();
-	getplayersnames(player);
-	coupling();
-	printresults();
+	SetNumOfPlayers();
+	SetPlayerName(Person);
+	Coupling();
+	PrintResults();
 		
 	return 0;
 }
@@ -74,7 +75,7 @@ int main ()
 //												METHODS
 //*****************************************************************************************************
 
-void reset (int numofplayers, details *a)	// METHOD FOR RECALL RESET IN THE STRUCT
+static void reset(int numofplayers, StrDetails *a)	// METHOD FOR RECALL RESET IN THE STRUCT
 {
 	for (int i = 0; i < numofplayers; i++)
 	{
@@ -86,30 +87,28 @@ void reset (int numofplayers, details *a)	// METHOD FOR RECALL RESET IN THE STRU
 //*****************************************************************************************************
 //*****************************************************************************************************
 
-int getplayersnumber()
+void SetNumOfPlayers()
 {
 	do
 	{
 		printf ("Inserire un numero di giocatori PARI: ");	// INSERT AN EVEN PLAYERS NUMBER
-		scanf("%d", &n_players);
-	}
+		scanf("%d", &NumOfPlayers);
+	} 
+	while (NumOfPlayers % 2 != 0);	// IF IS ODD REDO
 	
-	while (n_players %2 != 0);	// IF IS ODD REDO
-	
-	return n_players;
 }
 
 //*****************************************************************************************************
 //*****************************************************************************************************
 //*****************************************************************************************************
 
-void getplayersnames (details *a)
+void SetPlayerName(StrDetails *a)
 {	
-	for (int i = 0; i < n_players; i++)	// COLLECTING NAMES AND SAVING THEM IN A STRUCT
+	for (int i = 0; i < NumOfPlayers; i++)	// COLLECTING NAMES AND SAVING THEM IN A STRUCT
 	{
-		a[i].id = i;
+		a[i].ID = i;
 		printf ("\nInserire il nome numero %d: ", i + 1);
-		scanf("%s", a[i].name);
+		scanf("%s", a[i].PlayerName);
 	}	
 }
 
@@ -117,18 +116,12 @@ void getplayersnames (details *a)
 //*****************************************************************************************************
 //*****************************************************************************************************
 
-char carattereMinuscolo (char a[])	// TRANSFORM CHARACTERS IN LOWERCASES
-	
+static void SetNameToLowerCase(char a[])	// TRANSFORM CHARACTERS IN LOWERCASES
 {	
 	for (int i = 0; i < 20; i++)
 	{
-		if (a[i] >= 'A' && a[i] <= 'Z')
-			
-			a[i] = a[i] + 32;
-							
-		else 
-				
-			a[i] = a[i];								
+		if (a[i] >= 'A' && a[i] <= 'Z') a[i] = a[i] + 32;
+		else                            a[i] = a[i];								
 	}		
 }
 	
@@ -136,7 +129,8 @@ char carattereMinuscolo (char a[])	// TRANSFORM CHARACTERS IN LOWERCASES
 //*****************************************************************************************************
 //*****************************************************************************************************	
 
-void coupling ()
+//TO_DO: it should work with odd numbers too..
+void Coupling()
 {	
 	srand (time(NULL));
 	
@@ -147,34 +141,32 @@ void coupling ()
 		flag = false;
 		int err = 0;
 		
-		for (int i = 0; i < n_players; i++)	
+		for (int i = 0; i < NumOfPlayers; i++)	
 		{	
-			int nrandom = rand() % n_players;	// GENERATE RANDOM NUMBERS
+			int nrandom = rand() % NumOfPlayers;	// GENERATE RANDOM NUMBERS
 			
-			if (nrandom == i)	// CHECK THAT A NAME IS NOT EXTRACTED WITH ITSELF
+			if (nrandom == i)	// CHECK THAT A PlayerName IS NOT EXTRACTED WITH ITSELF
 			{
 				i--;
 				flag = true;
 				break;	
 			}
 				
-			player[i].pairednumber = nrandom;	// NUMBER ASSIGNMENT
-			strcpy (player[i].coupling, player[nrandom].name);	// NAME ASSIGNMENT
+			Person[i].PairedNumber = nrandom;	// NUMBER ASSIGNMENT
+			strcpy (Person[i].PartnerName, Person[nrandom].PlayerName);	// NAME ASSIGNMENT
 
-			
-			for (int i1 = 0; i1 < i; i1++)	// CHECK THAT A NAME IS NOT ALREADY EXTRACTED
+			for (int j = 0; j < i; j++)	// CHECK THAT A NAME IS NOT ALREADY EXTRACTED
 			{
-				if (player[i].pairednumber == player[i1].pairednumber)
+				if (Person[i].PairedNumber == Person[j].PairedNumber)
 				{
-					reset(n_players, player); // CLEAN ALL
+					reset(NumOfPlayers, Person); // CLEAN ALL
 					err = 1;
 					flag = true;
 					break;
 				}
 			}		
 		
-			if (err == 1)
-				break;	
+			if (err == 1) break;	
 		}		
 	}		
 }
@@ -183,7 +175,7 @@ void coupling ()
 //*****************************************************************************************************
 //*****************************************************************************************************
 
-void printresults()
+void PrintResults()
 {
 	int cnt = 0;
 	bool tamp = true;
@@ -198,21 +190,22 @@ void printresults()
 		
 		printf("\tBenvenuto all'estrazione dei regali di Natale!\n\n\tPer favore inserisci il tuo nome: ");
 		scanf("%s", user_name);
-		carattereMinuscolo(user_name);	// TRANSFORM CHARACTERS IN LOWERCASES
 		
-		for (int i = 0; i < n_players; i++)
+		SetNameToLowerCase(user_name);	// TRANSFORM CHARACTERS IN LOWERCASES
+		
+		for (int i = 0; i < NumOfPlayers; i++)
 		{	
-			if(strcmp (user_name, player[i].name) == 0)
+			if(strcmp (user_name, Person[i].PlayerName) == 0)
 			{
-				printf("\n\tDovrai fare un regalo a: %s", player[i].coupling);
+				printf("\n\tDovrai fare un regalo a: %s", Person[i].PartnerName);
 				printf("\n\n");
 				cnt ++;
 				break;
 			}
 		}
-	
-		if(cnt == n_players)	// IF I HAVE PRINTED ALL THE CASES -> EXIT
-		tamp = false;
+		
+	    // IF I HAVE PRINTED ALL THE CASES -> EXIT
+		if(cnt == NumOfPlayers)	tamp = false;
 	}
 	
 	printf ("\n************ESTRAZIONE TERMINATA, BUON NATALE**************");
